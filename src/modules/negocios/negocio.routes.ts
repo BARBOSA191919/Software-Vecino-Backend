@@ -1,6 +1,8 @@
-const router = require('express').Router()
-const controller = require('./negocio.controller')
-const { verificarToken } = require('../../middlewares/auth.middleware')
+import { Router } from 'express'
+import * as controller from './negocio.controller'
+import { verificarToken } from '../../middlewares/auth.middleware'
+
+const router = Router()
 
 // Rutas públicas
 router.get('/', controller.obtenerNegocios)
@@ -12,4 +14,4 @@ router.post('/', verificarToken, controller.crearNegocio)
 router.put('/:id', verificarToken, controller.actualizarNegocio)
 router.delete('/:id', verificarToken, controller.eliminarNegocio)
 
-module.exports = router 
+export default router 

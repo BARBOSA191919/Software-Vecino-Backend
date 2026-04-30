@@ -1,7 +1,8 @@
-require('dotenv').config()
-const express = require('express')
-const cors = require('cors')
-const morgan = require('morgan')
+import 'dotenv/config'
+import express from 'express'
+import cors from 'cors'
+import morgan from 'morgan'
+import negocioRoutes from './modules/negocios/negocio.routes'
 
 const app = express()
 
@@ -11,12 +12,12 @@ app.use(morgan('dev'))
 app.use(express.json())
 
 // Rutas
-app.use('/api/negocios', require('./modules/negocios/negocio.routes'))
+app.use('/api/negocios', negocioRoutes)
 
 // Ruta de salud
 app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
+  res.json({
+    status: 'OK',
     project: 'Vecino API',
     version: '1.0.0'
   })
@@ -27,4 +28,4 @@ app.listen(PORT, () => {
   console.log(`✓ Vecino API corriendo en puerto ${PORT}`)
 })
 
-module.exports = app
+export default app
