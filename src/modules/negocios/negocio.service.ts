@@ -1,6 +1,22 @@
-const negocioModel = require('./negocio.model')
+import * as negocioModel from './negocio.model'
+import type { Negocio, DatosNegocio, FiltrosNegocio } from './negocio.model'
 
-const crearNegocio = async (usuarioId, datos) => {
+interface DatosCrearNegocio {
+  nombre: string
+  descripcion?: string
+  categoria: string
+  direccion: string
+  ciudad?: string
+  horario?: string
+  imagen_url?: string | null
+}
+
+interface DatosActualizarNegocio extends Partial<DatosCrearNegocio> {}
+
+export const crearNegocio = async (
+  usuarioId: string,
+  datos: DatosCrearNegocio
+): Promise<Negocio> => {
   if (!datos.nombre || datos.nombre.trim() === '') {
     throw new Error('El nombre del negocio es obligatorio')
   }
@@ -20,48 +36,46 @@ const crearNegocio = async (usuarioId, datos) => {
     ciudad: datos.ciudad || 'Armenia',
     horario: datos.horario || '',
     imagen_url: datos.imagen_url || null,
-  })
+    activo: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  } as any)
 
   return negocio
 }
 
-const obtenerNegocios = async (filtros) => {
+export const obtenerNegocios = async (filtros?: FiltrosNegocio): Promise<Negocio[]> => {
   return await negocioModel.obtenerNegocios(filtros)
 }
 
-const obtenerNegocioPorId = async (id) => {
+export const obtenerNegocioPorId = async (id: string): Promise<Negocio> => {
   const negocio = await negocioModel.obtenerNegocioPorId(id)
   if (!negocio) throw new Error('Negocio no encontrado')
   return negocio
 }
 
-const obtenerMisNegocios = async (usuarioId) => {
+export const obtenerMisNegocios = async (usuarioId: string): Promise<Negocio[]> => {
   return await negocioModel.obtenerNegociosPorUsuario(usuarioId)
 }
 
-const actualizarNegocio = async (id, usuarioId, datos) => {
+export const actualizarNegocio = async (
+  id: string,
+  usuarioId: string,
+  datos: DatosActualizarNegocio
+): Promise<Negocio> => {
   const negocio = await negocioModel.obtenerNegocioPorId(id)
   if (!negocio) throw new Error('Negocio no encontrado')
   if (negocio.usuario_id !== usuarioId) {
     throw new Error('No tienes permiso para editar este negocio')
   }
-  return await negocioModel.actualizarNegocio(id, datos)
+  return await negocioModel.actualizarNegocio(id, datos as Partial<DatosNegocio>)
 }
 
-const eliminarNegocio = async (id, usuarioId) => {
+export const eliminarNegocio = async (id: string, usuarioId: string): Promise<Negocio> => {
   const negocio = await negocioModel.obtenerNegocioPorId(id)
   if (!negocio) throw new Error('Negocio no encontrado')
   if (negocio.usuario_id !== usuarioId) {
     throw new Error('No tienes permiso para eliminar este negocio')
   }
   return await negocioModel.eliminarNegocio(id)
-}
-
-module.exports = {
-  crearNegocio,
-  obtenerNegocios,
-  obtenerNegocioPorId,
-  obtenerMisNegocios,
-  actualizarNegocio,
-  eliminarNegocio
 }
