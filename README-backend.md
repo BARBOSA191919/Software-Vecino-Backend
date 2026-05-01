@@ -19,6 +19,7 @@ API RESTful del sistema **Vecino**, una plataforma de marketplace hiperlocal ori
 - [Instalación y configuración](#instalación-y-configuración)
 - [Variables de entorno](#variables-de-entorno)
 - [Ejecución](#ejecución)
+- [Documentación Swagger](#documentación-swagger)
 - [Endpoints principales](#endpoints-principales)
 - [Equipo de desarrollo](#equipo-de-desarrollo)
 
@@ -37,13 +38,13 @@ La arquitectura sigue el patrón **MVC (Modelo - Vista - Controlador)** con sepa
 | Tecnología | Versión | Propósito |
 |---|---|---|
 | Node.js | 18.x | Entorno de ejecución |
-| Express | 4.x | Framework HTTP y API REST |
+| Express | 5.x | Framework HTTP y API REST |
 | PostgreSQL | 15 | Base de datos relacional |
 | JWT | — | Autenticación y gestión de sesiones |
 | Bcrypt | — | Encriptación de contraseñas |
 | Socket.io | — | Notificaciones en tiempo real |
 | dotenv | — | Gestión de variables de entorno |
-| pg / Sequelize | — | Conexión y ORM con PostgreSQL |
+| pg | — | Script de setup SQL sobre Supabase/PostgreSQL |
 
 ---
 
@@ -97,11 +98,8 @@ npm install
 cp .env.example .env
 # Editar el archivo .env con los valores correspondientes
 
-# 4. Crear la base de datos en PostgreSQL
-psql -U postgres -c "CREATE DATABASE vecino_db;"
-
-# 5. Ejecutar migraciones
-npm run migrate
+# 4. Inicializar esquema SQL en Supabase/PostgreSQL
+npm run db:setup
 ```
 
 ---
@@ -115,19 +113,12 @@ Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
 PORT=3000
 NODE_ENV=development
 
-# Base de datos
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=vecino_db
-DB_USER=postgres
-DB_PASSWORD=tu_contraseña
+# Supabase
+SUPABASE_URL=https://TU-PROYECTO.supabase.co
+SUPABASE_SERVICE_KEY=sb_service_role_xxx
 
-# Autenticación
-JWT_SECRET=tu_clave_secreta_jwt
-JWT_EXPIRES_IN=24h
-
-# Bcrypt
-BCRYPT_SALT_ROUNDS=10
+# Solo para script db:setup
+DATABASE_URL=postgresql://postgres:TU_CLAVE@db.TU-PROYECTO.supabase.co:5432/postgres
 ```
 
 ---
@@ -143,6 +134,16 @@ npm start
 ```
 
 El servidor quedará disponible en: `http://localhost:3000`
+
+---
+
+## Documentación Swagger
+
+- UI: `http://localhost:3000/api-docs`
+- JSON OpenAPI: `http://localhost:3000/api-docs.json`
+
+La documentación cubre los endpoints actualmente implementados en el backend:
+`/health` y el módulo `/api/negocios`.
 
 ---
 
