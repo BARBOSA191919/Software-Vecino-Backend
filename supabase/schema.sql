@@ -31,3 +31,15 @@ create table if not exists public.negocios (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+create table if not exists public.productos (
+  id uuid primary key default gen_random_uuid(),
+  negocio_id uuid not null references public.negocios(id) on delete cascade,
+  nombre text not null,
+  descripcion text not null,
+  precio numeric(10,2) not null check (precio > 0),
+  imagen_url text not null,
+  activo boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);

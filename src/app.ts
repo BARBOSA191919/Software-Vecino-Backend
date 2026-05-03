@@ -4,6 +4,7 @@ import cors from 'cors'
 import morgan from 'morgan'
 import swaggerUi from 'swagger-ui-express'
 import negocioRoutes from './modules/negocios/negocio.routes'
+import productoRoutes from './modules/productos/producto.routes'
 import { swaggerSpec } from './docs/swagger'
 
 const app = express()
@@ -15,6 +16,7 @@ app.use(express.json())
 
 // Rutas
 app.use('/api/negocios', negocioRoutes)
+app.use('/api/productos', productoRoutes)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 app.get('/api-docs.json', (req, res) => {

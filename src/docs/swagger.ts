@@ -4,7 +4,7 @@ export const swaggerSpec = {
     title: 'Vecino Backend API',
     version: '1.0.0',
     description:
-      'Documentacion OpenAPI del backend actual. Incluye healthcheck y modulo de negocios.'
+      'Documentacion OpenAPI del backend actual. Incluye healthcheck y modulos de negocios y productos.'
   },
   servers: [
     {
@@ -14,7 +14,8 @@ export const swaggerSpec = {
   ],
   tags: [
     { name: 'Health', description: 'Estado de la API' },
-    { name: 'Negocios', description: 'Gestion de negocios' }
+    { name: 'Negocios', description: 'Gestion de negocios' },
+    { name: 'Productos', description: 'Gestion de productos' }
   ],
   components: {
     securitySchemes: {
@@ -61,6 +62,41 @@ export const swaggerSpec = {
           ciudad: { type: 'string', example: 'Armenia' },
           horario: { type: 'string', example: 'L-V 07:00 - 19:00' },
           imagen_url: { type: 'string', nullable: true, example: null }
+        }
+      },
+      ProductoNegocio: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', example: '5e7c4763-5de2-4d56-91dc-c8f4a2784f62' },
+          nombre: { type: 'string', example: 'Panaderia La Esquina' },
+          categoria: { type: 'string', example: 'Alimentos' },
+          ciudad: { type: 'string', example: 'Armenia' }
+        }
+      },
+      Producto: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', example: 'c4703140-880b-47ba-9015-7b94acdd07aa' },
+          negocio_id: { type: 'string', example: '5e7c4763-5de2-4d56-91dc-c8f4a2784f62' },
+          nombre: { type: 'string', example: 'Pandebono tradicional' },
+          descripcion: { type: 'string', example: 'Pandebono artesanal horneado el mismo dia' },
+          precio: { type: 'number', example: 3500 },
+          imagen_url: { type: 'string', example: 'https://images.vecino.app/pandebono.jpg' },
+          activo: { type: 'boolean', example: true },
+          created_at: { type: 'string', format: 'date-time' },
+          updated_at: { type: 'string', format: 'date-time' },
+          negocio: { $ref: '#/components/schemas/ProductoNegocio' }
+        }
+      },
+      ProductoInput: {
+        type: 'object',
+        required: ['negocio_id', 'nombre', 'descripcion', 'precio', 'imagen_url'],
+        properties: {
+          negocio_id: { type: 'string', example: '5e7c4763-5de2-4d56-91dc-c8f4a2784f62' },
+          nombre: { type: 'string', example: 'Pandebono tradicional' },
+          descripcion: { type: 'string', example: 'Pandebono artesanal horneado el mismo dia' },
+          precio: { type: 'number', example: 3500 },
+          imagen_url: { type: 'string', example: 'https://images.vecino.app/pandebono.jpg' }
         }
       },
       ApiSuccess: {
@@ -338,6 +374,116 @@ export const swaggerSpec = {
             content: {
               'application/json': {
                 schema: { $ref: '#/components/schemas/ApiError' }
+              }
+            }
+          },
+          '401': {
+            description: 'No autenticado',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ApiError' }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/productos': {
+      get: {
+        tags: ['Productos'],
+        summary: 'Listar productos publicados',
+        responses: {
+          '200': {
+            description: 'Listado de productos',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    total: { type: 'number', example: 1 },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/Producto' }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      post: {
+        tags: ['Productos'],
+        summary: 'Publicar producto',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/ProductoInput' }
+            }
+          }
+        },
+        responses: {
+          '201': {
+            description: 'Producto publicado',
+            content: {
+              'application/json': {
+                schema: {
+                  allOf: [
+                    { $ref: '#/components/schemas/ApiSuccess' },
+                    {
+                      type: 'object',
+                      properties: {
+                        data: { $ref: '#/components/schemas/Producto' }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          '400': {
+            description: 'Error de validacion',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ApiError' }
+              }
+            }
+          },
+          '401': {
+            description: 'No autenticado',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ApiError' }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/productos/mis-productos': {
+      get: {
+        tags: ['Productos'],
+        summary: 'Listar productos del usuario autenticado',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Listado de productos del comerciante',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    total: { type: 'number', example: 1 },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/Producto' }
+                    }
+                  }
+                }
               }
             }
           },
