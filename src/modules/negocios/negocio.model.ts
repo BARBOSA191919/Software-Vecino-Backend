@@ -11,6 +11,8 @@ export interface Negocio {
   horario: string
   imagen_url: string | null
   activo: boolean
+  calificacion_promedio: number
+  total_resenas: number
   created_at: string
   updated_at: string
 }
@@ -20,7 +22,7 @@ export interface FiltrosNegocio {
   ciudad?: string
 }
 
-export interface DatosNegocio extends Omit<Negocio, 'id' | 'activo' | 'created_at' | 'updated_at'> {}
+export interface DatosNegocio extends Omit<Negocio, 'id' | 'activo' | 'calificacion_promedio' | 'total_resenas' | 'created_at' | 'updated_at'> {}
 
 export const crearNegocio = async (datos: DatosNegocio): Promise<Negocio> => {
   const { data, error } = await supabase
