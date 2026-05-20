@@ -66,6 +66,10 @@ export const crearProducto = async (datos: DatosProducto): Promise<Producto> => 
   return normalizarProducto(data as unknown as ProductoRow)
 }
 
+/**
+ * Obtiene todos los productos activos con información de sus negocios
+ * @returns Lista de productos activos con sus negocios asociados
+ */
 export const obtenerProductos = async (): Promise<Producto[]> => {
   const { data, error } = await supabase
     .from('productos')
