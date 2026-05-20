@@ -55,13 +55,22 @@ export const obtenerNegocios = async (filtros: FiltrosNegocio = {}): Promise<Neg
 }
 
 export const obtenerNegocioPorId = async (id: string): Promise<Negocio> => {
+  console.log(`Buscando negocio con ID: ${id}`)
   const { data, error } = await supabase
     .from('negocios')
     .select('*')
     .eq('id', id)
     .single()
 
-  if (error) throw error
+  if (error) {
+    console.error('Error al obtener negocio:', error)
+    throw error
+  }
+  if (!data) {
+    console.error('Negocio no encontrado con ID:', id)
+    throw new Error('Negocio no encontrado')
+  }
+  console.log('Negocio encontrado:', data)
   return data as Negocio
 }
 
