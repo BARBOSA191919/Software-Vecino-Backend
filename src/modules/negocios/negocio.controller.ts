@@ -77,16 +77,19 @@ export const obtenerMisNegocios = async (req: Request, res: Response): Promise<v
 export const obtenerNegocioPorId = async (req: Request, res: Response): Promise<void> => {
   try {
     const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id
+    console.log(`Backend recibio solicitud para negocio ID: "${id}"`)
     const negocio = await negocioService.obtenerNegocioPorId(id)
     res.status(200).json({
       success: true,
       data: negocio
     })
-  } catch (error) {
-    const mensaje = error instanceof Error ? error.message : 'Error desconocido'
+  } catch (error: any) {
+    console.error('Error en backend obtenerNegocioPorId:', error)
+    const mensaje = error.message || 'Error desconocido'
     res.status(404).json({
       success: false,
-      mensaje
+      mensaje: mensaje,
+      error_detalle: JSON.stringify(error)
     })
   }
 }

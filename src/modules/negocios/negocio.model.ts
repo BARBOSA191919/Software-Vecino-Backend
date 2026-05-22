@@ -11,6 +11,8 @@ export interface Negocio {
   horario: string
   imagen_url: string | null
   activo: boolean
+  calificacion_promedio: number
+  total_resenas: number
   created_at: string
   updated_at: string
 }
@@ -20,7 +22,7 @@ export interface FiltrosNegocio {
   ciudad?: string
 }
 
-export interface DatosNegocio extends Omit<Negocio, 'id' | 'activo' | 'created_at' | 'updated_at'> {}
+export interface DatosNegocio extends Omit<Negocio, 'id' | 'activo' | 'calificacion_promedio' | 'total_resenas' | 'created_at' | 'updated_at'> {}
 
 export const crearNegocio = async (datos: DatosNegocio): Promise<Negocio> => {
   const { data, error } = await supabase
@@ -53,13 +55,22 @@ export const obtenerNegocios = async (filtros: FiltrosNegocio = {}): Promise<Neg
 }
 
 export const obtenerNegocioPorId = async (id: string): Promise<Negocio> => {
+  console.log(`Buscando negocio con ID: ${id}`)
   const { data, error } = await supabase
     .from('negocios')
     .select('*')
     .eq('id', id)
     .single()
 
-  if (error) throw error
+  if (error) {
+    console.error('Error al obtener negocio:', error)
+    throw error
+  }
+  if (!data) {
+    console.error('Negocio no encontrado con ID:', id)
+    throw new Error('Negocio no encontrado')
+  }
+  console.log('Negocio encontrado:', data)
   return data as Negocio
 }
 
