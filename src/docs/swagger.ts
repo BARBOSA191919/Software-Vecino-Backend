@@ -16,7 +16,8 @@ export const swaggerSpec = {
     { name: 'Health', description: 'Estado de la API' },
     { name: 'Negocios', description: 'Gestion de negocios' },
     { name: 'Productos', description: 'Gestion de productos' },
-    { name: 'Pedidos', description: 'Gestion de pedidos' }
+    { name: 'Pedidos', description: 'Gestion de pedidos' },
+    { name: 'Geolocalizacion', description: 'Descubrimiento de negocios cercanos (EP-06)' }
   ],
   components: {
     securitySchemes: {
@@ -173,6 +174,23 @@ export const swaggerSpec = {
             enum: ['pendiente', 'confirmado', 'en_preparacion', 'en_camino', 'entregado'],
             example: 'confirmado'
           }
+        }
+      },
+      MarcadorNegocio: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', example: '5e7c4763-5de2-4d56-91dc-c8f4a2784f62' },
+          nombre: { type: 'string', example: 'Panaderia La Esquina' },
+          descripcion: { type: 'string', example: 'Pan fresco todo el dia' },
+          categoria: { type: 'string', example: 'Alimentos' },
+          direccion: { type: 'string', example: 'Calle 10 # 12-34' },
+          ciudad: { type: 'string', example: 'Armenia' },
+          imagen_url: { type: 'string', nullable: true, example: null },
+          calificacion_promedio: { type: 'number', example: 4.5 },
+          total_resenas: { type: 'number', example: 12 },
+          latitud: { type: 'number', example: 4.533889 },
+          longitud: { type: 'number', example: -75.681389 },
+          distancia_km: { type: 'number', example: 1.24 }
         }
       },
       CrearPedidoInput: {
@@ -895,6 +913,71 @@ export const swaggerSpec = {
             content: {
               'application/json': {
                 schema: { $ref: '#/components/schemas/ApiError' }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/geolocalizacion/cercanos': {
+      get: {
+        tags: ['Geolocalizacion'],
+        summary: 'Buscar negocios cercanos (EP-06)',
+        description:
+          'Devuelve negocios activos cercanos a la ubicacion del consumidor como marcadores para el mapa, ordenados por distancia. Permite filtrar por categoria, radio de busqueda y calificacion minima.',
+        parameters: [
+          { in: 'query', name: 'lat', required: true, schema: { type: 'number' }, description: 'Latitud de la ubicacion del consumidor (-90 a 90)' },
+          { in: 'query', name: 'lng', required: true, schema: { type: 'number' }, description: 'Longitud de la ubicacion del consumidor (-180 a 180)' },
+          { in: 'query', name: 'radio', schema: { type: 'number', default: 5 }, description: 'Radio de busqueda en kilometros (por defecto 5, maximo 50)' },
+          { in: 'query', name: 'categoria', schema: { type: 'string' }, description: 'Filtra por categoria de negocio' },
+          { in: 'query', name: 'ciudad', schema: { type: 'string' }, description: 'Filtra por ciudad' },
+          { in: 'query', name: 'calificacion_min', schema: { type: 'number', minimum: 0, maximum: 5 }, description: 'Calificacion promedio minima (0 a 5)' }
+        ],
+        responses: {
+          '200': {
+            description: 'Listado de negocios cercanos',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    total: { type: 'number', example: 2 },
+                    data: { type: 'array', items: { $ref: '#/components/schemas/MarcadorNegocio' } }
+                  }
+                }
+              }
+            }
+          },
+          '400': {
+            description: 'Parametros invalidos',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ApiError' }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/geolocalizacion/categorias': {
+      get: {
+        tags: ['Geolocalizacion'],
+        summary: 'Listar categorias disponibles para el mapa',
+        description: 'Devuelve las categorias distintas de negocios activos con coordenadas, para alimentar el filtro del mapa.',
+        responses: {
+          '200': {
+            description: 'Listado de categorias',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    total: { type: 'number', example: 3 },
+                    data: { type: 'array', items: { type: 'string', example: 'Alimentos' } }
+                  }
+                }
               }
             }
           }

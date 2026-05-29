@@ -38,9 +38,35 @@ create table if not exists public.negocios (
   activo boolean not null default true,
   calificacion_promedio numeric(3,2) not null default 0,
   total_resenas integer not null default 0,
+  latitud double precision,
+  longitud double precision,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- EP-06 Geolocalizacion: coordenadas para el mapa interactivo.
+-- Se agregan de forma idempotente para bases ya creadas.
+alter table public.negocios add column if not exists latitud double precision;
+alter table public.negocios add column if not exists longitud double precision;
+
+-- Restringe rangos validos de coordenadas (idempotente).
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conname = 'negocios_latitud_check') then
+    alter table public.negocios
+      add constraint negocios_latitud_check check (latitud is null or (latitud >= -90 and latitud <= 90));
+  end if;
+  if not exists (select 1 from pg_constraint where conname = 'negocios_longitud_check') then
+    alter table public.negocios
+      add constraint negocios_longitud_check check (longitud is null or (longitud >= -180 and longitud <= 180));
+  end if;
+end
+$$;
+
+-- Indice para acelerar el filtrado de negocios geolocalizados.
+create index if not exists idx_negocios_coordenadas
+  on public.negocios (latitud, longitud)
+  where activo = true and latitud is not null and longitud is not null;
 
 create table if not exists public.productos (
   id uuid primary key default gen_random_uuid(),

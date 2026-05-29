@@ -13,6 +13,8 @@ export interface Negocio {
   activo: boolean
   calificacion_promedio: number
   total_resenas: number
+  latitud: number | null
+  longitud: number | null
   created_at: string
   updated_at: string
 }
