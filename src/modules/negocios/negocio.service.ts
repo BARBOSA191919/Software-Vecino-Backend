@@ -9,9 +9,26 @@ interface DatosCrearNegocio {
   ciudad?: string
   horario?: string
   imagen_url?: string | null
+  latitud?: number | null
+  longitud?: number | null
 }
 
 interface DatosActualizarNegocio extends Partial<DatosCrearNegocio> {}
+
+const validarCoordenada = (
+  valor: number | null | undefined,
+  tipo: 'latitud' | 'longitud'
+): number | null => {
+  if (valor === null || valor === undefined) return null
+  if (typeof valor !== 'number' || !Number.isFinite(valor)) {
+    throw new Error(`La ${tipo} debe ser un numero valido`)
+  }
+  const limite = tipo === 'latitud' ? 90 : 180
+  if (valor < -limite || valor > limite) {
+    throw new Error(`La ${tipo} debe estar entre ${-limite} y ${limite}`)
+  }
+  return valor
+}
 
 export const crearNegocio = async (
   usuarioId: string,
@@ -36,6 +53,8 @@ export const crearNegocio = async (
     ciudad: datos.ciudad || 'Armenia',
     horario: datos.horario || '',
     imagen_url: datos.imagen_url || null,
+    latitud: validarCoordenada(datos.latitud, 'latitud'),
+    longitud: validarCoordenada(datos.longitud, 'longitud'),
     activo: true,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
@@ -68,7 +87,14 @@ export const actualizarNegocio = async (
   if (negocio.usuario_id !== usuarioId) {
     throw new Error('No tienes permiso para editar este negocio')
   }
-  return await negocioModel.actualizarNegocio(id, datos as Partial<DatosNegocio>)
+  const datosValidados: DatosActualizarNegocio = { ...datos }
+  if ('latitud' in datos) {
+    datosValidados.latitud = validarCoordenada(datos.latitud, 'latitud')
+  }
+  if ('longitud' in datos) {
+    datosValidados.longitud = validarCoordenada(datos.longitud, 'longitud')
+  }
+  return await negocioModel.actualizarNegocio(id, datosValidados as Partial<DatosNegocio>)
 }
 
 export const eliminarNegocio = async (id: string, usuarioId: string): Promise<Negocio> => {
