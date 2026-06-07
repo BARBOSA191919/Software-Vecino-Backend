@@ -18,19 +18,29 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
       
       - name: Install dependencies
-        run: npm ci
+        run: npm install
       
       # - name: Run linter
       #   run: npm run lint
       
       - name: Run tests
+        env:
+          SUPABASE_URL: https://dummy.supabase.co
+          SUPABASE_SERVICE_KEY: dummy-key
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+          PORT: 3000
         run: npm test
       
       - name: Generate coverage report
+        env:
+          SUPABASE_URL: https://dummy.supabase.co
+          SUPABASE_SERVICE_KEY: dummy-key
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+          PORT: 3000
         run: npm run test:coverage
       
       # - name: Upload coverage to Codecov
