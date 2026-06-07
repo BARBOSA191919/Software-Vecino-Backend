@@ -37,7 +37,7 @@ export const crearResena = async (req: Request, res: Response) => {
 export const obtenerResenas = async (req: Request, res: Response) => {
   try {
     const { negocioId } = req.params
-    const resenas = await ResenaService.obtenerResenas(negocioId)
+    const resenas = await ResenaService.obtenerResenas(Array.isArray(negocioId) ? negocioId[0] : negocioId)
     res.status(200).json({ success: true, data: resenas })
   } catch (error: any) {
     res.status(500).json({ success: false, error: 'Error al obtener las reseñas', detail: error.message })
