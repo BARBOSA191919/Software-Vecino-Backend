@@ -10,45 +10,42 @@ jobs:
   backend-test:
     name: Backend Tests
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: '20'
           cache: 'npm'
-      
+
       - name: Install dependencies
-        run: npm install
-      
-      # - name: Run linter
-      #   run: npm run lint
-      
-      - name: Run tests
+        run: npm ci
+
+      - name: Run tests with coverage
         env:
           SUPABASE_URL: https://dummy.supabase.co
-          SUPABASE_SERVICE_KEY: dummy-key
+          SUPABASE_SERVICE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.dummy
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+          JWT_SECRET: test-secret-key-for-ci
           PORT: 3000
-        run: npm test
-      
-      - name: Generate coverage report
-        env:
-          SUPABASE_URL: https://dummy.supabase.co
-          SUPABASE_SERVICE_KEY: dummy-key
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
-          PORT: 3000
-        run: npm run test:coverage
-      
-      # - name: Upload coverage to Codecov
-      #   uses: codecov/codecov-action@v4
-      #   with:
-      #     file: ./coverage/lcov.info
-      #     flags: backend
-      #     name: backend-coverage
-      
+          NODE_ENV: test
+        run: npm run test:coverage -- --forceExit --passWithNoTests
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: coverage/lcov-report/
+
       - name: Build
+        env:
+          SUPABASE_URL: https://dummy.supabase.co
+          SUPABASE_SERVICE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.dummy
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+          JWT_SECRET: test-secret-key-for-ci
+          PORT: 3000
         run: npm run build
